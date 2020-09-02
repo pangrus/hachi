@@ -2,7 +2,6 @@
 -- 808 drum machine for norns
 --
 -- k1 shift
--- k1+k3 randomize all
 -- k1+k3 clear all (if stopped)
 -- k1+k3 randomize (if started)
 -- k2 start/stop
