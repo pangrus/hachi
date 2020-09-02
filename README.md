@@ -1,10 +1,13 @@
-## hachi
+# hachi
 
-a small 808 drum machine for monome norns
+A small 808 drum machine for monome norns.
+I've written this to start my learning process of Lua and SuperCollider.   
+The sound engine is based on the SC808 by [Yoshinosuke Horiuchi](https://www.patreon.com/4H). I've implemented only my favorite sounds, to keep the GUI in a single norns page.
+The sequencer borrow some techniques from the playfair euclidean drummer written by [@tehn](https://github.com/tehn), with some new features (randomizer, real time recording).
 
 ![hachi](hachi.jpg)
 
-# how to use hachi
+## how to use hachi
 k1 shift  
 k1+k3 randomize all  
 k1+k3 clear all (if stopped)  
@@ -18,8 +21,6 @@ e3 drum parameter 2
 e2+shift number of pulses  
 e3+shift number of steps  
 
-# why/how
-I've written this to start my learning process of Lua and SuperCollider.   
-The sound engine is based on the SC808 by Yoshinosuke Horiuchi.   
+
 
 
