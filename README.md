@@ -5,7 +5,7 @@ a small 808 drum machine for monome norns
 ![hachi](hachi.jpg)
 
 # how to use hachi
-k1 shift 
+k1 shift  
 k1+k3 randomize all 
 k1+k3 clear all (if stopped) 
 k1+k3 randomize (if started) 
