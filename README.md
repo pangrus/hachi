@@ -1,2 +1,8 @@
 # hachi
-808 drum machine for monome norns 
+
+![hachi](hachi.jpg)
+
+808 drum machine for monome norns
+
+
+
