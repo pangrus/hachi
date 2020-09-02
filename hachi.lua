@@ -13,6 +13,8 @@
 -- e3 drum parameter 2
 -- e2+shift number of pulses
 -- e3+shift number of steps
+--
+-- pangrus 2020
 
 -- hachi means 8
 engine.name = "Hachi"
