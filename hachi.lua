@@ -10,8 +10,8 @@
 -- e1 instrument select
 -- e2 drum parameter 1
 -- e3 drum parameter 2
--- e2+shift number of pulses
--- e3+shift number of steps
+-- e2+k1 number of pulses
+-- e3+k1 number of steps
 --
 -- pangrus 2020
 
