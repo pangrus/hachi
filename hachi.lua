@@ -30,11 +30,11 @@ local reset = false
 local is_running = false
 local selected = 1
 local shift = false
-local kick_tone = 60
-local kick_decay = 10
-local hh_decay = 10
-local snare_tone = 340
-local snappy = 30
+local kick_tone = 58
+local kick_decay = 28
+local hh_decay = 8
+local snare_tone = 288
+local snappy = 28
 
 -- midi management
 local MIDI_Clock = require "beatclock"
@@ -62,7 +62,7 @@ end
 function init_patterns()
     for i = 1, instrument_number do
         instrument[i] = {
-            k = math.floor(math.random() * 4) + 1,
+            k = math.floor(math.random() * 6) + 1,
             n = 16,
             pos = 1,
             s = {}
@@ -84,7 +84,7 @@ function clear_patterns()
   end
 
 function randomize_pattern(sel)
-    instrument[sel].k = math.floor(math.random() * 6) + 2
+    instrument[sel].k = math.floor(math.random() * 7) + 2
     generate_pattern(sel)
 end
 

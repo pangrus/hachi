@@ -28,10 +28,10 @@ Engine_Hachi : CroneEngine {
 SynthDef("kick", {
 	    arg kick_trigger, kick_decay, kick_amp, kick_tone;
 	    var fenv, env, trienv, sig, sub, punch, pfenv;
-	    env = EnvGen.kr(Env.new([0.11, 1, 0], [0, kick_decay], -225),doneAction:2);
-	    trienv = EnvGen.kr(Env.new([0.11, 0.6, 0], [0, kick_decay], -230),doneAction:2);
-	    fenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.05, 0.6], -14).kr;
-	    pfenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.03, 0.6], -10).kr;
+	    env = EnvGen.kr(Env.new([0.11, 1, 0], [0, kick_decay], -225),doneAction:3);
+	    trienv = EnvGen.kr(Env.new([0.11, 0.6, 0], [0, kick_decay], -230),doneAction:3);
+	    fenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.05, 0.6], -14,doneAction:3).kr;
+	    pfenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.03, 0.6], -10,doneAction:3).kr;
 	    sig = SinOsc.ar(fenv, pi/2) * env;
 	    sub = LFTri.ar(fenv, pi/2) * trienv * 0.05;
 	    punch = SinOsc.ar(pfenv, pi/2) * env * 2;
@@ -45,7 +45,7 @@ SynthDef("kick", {
 SynthDef.new("hhclosed", {
 	arg hhclosed_trigger, hh_decay = 0.4, amp = 0.8, pan=0;
 	var sig, sighi,siglow, sum, env, osc1, osc2, osc3, osc4, osc5, osc6;
-	env = EnvGen.kr(Env.perc(0.005, hh_decay, 1, -30),doneAction:2);
+	env = EnvGen.kr(Env.perc(0.005, hh_decay, 1, -30),doneAction:3);
 	osc1 = LFPulse.ar(203.52);
 	osc2 = LFPulse.ar(366.31);
 	osc3 = LFPulse.ar(301.77);
@@ -67,8 +67,8 @@ SynthDef.new("hhclosed", {
 SynthDef.new("snare", {
 	arg snare_trigger, amp=0.3, snare_tone, tone2=189, snappy, gate=0, amp2=0.8;
 	var noiseEnv, atkEnv, sig, noise, osc1, osc2, sum;
-	noiseEnv = EnvGen.kr(Env.perc(0.001, 4.2, 1, -115), doneAction:2);
-	atkEnv = EnvGen.kr(Env.perc(0.001, 0.8,curve:-95), doneAction:2);
+	noiseEnv = EnvGen.kr(Env.perc(0.001, 4.2, 1, -115), doneAction:3);
+	atkEnv = EnvGen.kr(Env.perc(0.001, 0.8,curve:-95), doneAction:3);
 	noise = WhiteNoise.ar;
 	noise = HPF.ar(noise, 1800);
 	noise = LPF.ar(noise, 8850);
