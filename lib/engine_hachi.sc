@@ -21,6 +21,7 @@ Engine_Hachi : CroneEngine {
 // this is called when the engine is actually loaded by a script.
   alloc {
 
+		var pg = ParGroup.tail(context.xg);
 
 // SynthDefs
 
@@ -28,7 +29,7 @@ SynthDef("kick", {
 	    arg kick_trigger, kick_decay, kick_amp, kick_tone;
 	    var fenv, env, trienv, sig, sub, punch, pfenv;
 	    env = EnvGen.kr(Env.new([0.11, 1, 0], [0, kick_decay], -225),doneAction:2);
-	    trienv = EnvGen.kr(Env.new([0.11, 0.6, 0], [0, kick_decay], -230),doneAction:0);
+	    trienv = EnvGen.kr(Env.new([0.11, 0.6, 0], [0, kick_decay], -230),doneAction:2);
 	    fenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.05, 0.6], -14).kr;
 	    pfenv = Env([kick_tone*7, kick_tone*1.35, kick_tone], [0.03, 0.6], -10).kr;
 	    sig = SinOsc.ar(fenv, pi/2) * env;
@@ -42,7 +43,7 @@ SynthDef("kick", {
 }).add;
 
 SynthDef.new("hhclosed", {
-	arg hhclosed_trigger, hh_decay=0.42, amp=0.8, pan=0;
+	arg hhclosed_trigger, hh_decay = 0.4, amp = 0.8, pan=0;
 	var sig, sighi,siglow, sum, env, osc1, osc2, osc3, osc4, osc5, osc6;
 	env = EnvGen.kr(Env.perc(0.005, hh_decay, 1, -30),doneAction:2);
 	osc1 = LFPulse.ar(203.52);
@@ -67,7 +68,7 @@ SynthDef.new("snare", {
 	arg snare_trigger, amp=0.3, snare_tone, tone2=189, snappy, gate=0, amp2=0.8;
 	var noiseEnv, atkEnv, sig, noise, osc1, osc2, sum;
 	noiseEnv = EnvGen.kr(Env.perc(0.001, 4.2, 1, -115), doneAction:2);
-	atkEnv = EnvGen.kr(Env.perc(0.001, 0.8,curve:-95), doneAction:0);
+	atkEnv = EnvGen.kr(Env.perc(0.001, 0.8,curve:-95), doneAction:2);
 	noise = WhiteNoise.ar;
 	noise = HPF.ar(noise, 1800);
 	noise = LPF.ar(noise, 8850);
@@ -84,7 +85,7 @@ SynthDef.new("clap", {
 	arg clap_trigger, amp=1, gate=0;
 	var atkenv, atk, decay, sum, denv;
 	atkenv = EnvGen.kr(Env.new([0.5,1,0],[0, 0.3], -160), doneAction:2);
-	denv = EnvGen.kr(Env.dadsr(0.026, 0, 6, 0, 1, 1, curve:-157), doneAction:0);
+	denv = EnvGen.kr(Env.dadsr(0.026, 0, 6, 0, 1, 1, curve:-157), doneAction:2);
 	atk = WhiteNoise.ar * atkenv * 1.4;
 	decay = WhiteNoise.ar * denv;
 	sum = atk + decay * amp;
@@ -96,7 +97,7 @@ SynthDef.new("clap", {
 SynthDef.new("cowbell", {
 	arg cowbell_trigger, amp=0.1;
 	var sig, pul1, pul2, env, atk, atkenv, datk;
-	atkenv = EnvGen.kr(Env.perc(0, 1, 1, -215),doneAction:0);
+	atkenv = EnvGen.kr(Env.perc(0, 1, 1, -215),doneAction:2);
 	env = EnvGen.kr(Env.perc(0.01, 9.5, 1, -90),doneAction:2);
 	pul1 = LFPulse.ar(811.16);
 	pul2 = LFPulse.ar(538.75);
@@ -124,7 +125,7 @@ SynthDef.new("claves", {
 		this.addCommand("kick_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("kick", [\out, context.out_b, \kick_trigger,val,\kick_decay,kick_decay,\kick_tone,kick_tone,\kick_amp,kick_amp], target:context.xg);
+		  Synth("kick", [\out, context.out_b, \kick_trigger,val,\kick_decay,kick_decay,\kick_tone,kick_tone,\kick_amp,kick_amp], target:pg);
 		});
 
    this.addCommand("kick_tone", "f", {arg msg;
@@ -142,7 +143,7 @@ SynthDef.new("claves", {
     this.addCommand("hhclosed_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("hhclosed", [\out, context.out_b, \hhclosed_trigger,val,\hh_decay,hh_decay], target:context.xg);
+		  Synth("hhclosed", [\out, context.out_b, \hhclosed_trigger,val,\hh_decay,hh_decay], target:pg);
 		});
 
     this.addCommand("hh_decay", "f", {arg msg;
@@ -153,7 +154,7 @@ SynthDef.new("claves", {
 		this.addCommand("snare_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("snare", [\out, context.out_b, \snare_trigger,val,\snare_tone,snare_tone,\snappy,snappy], target:context.xg);
+		  Synth("snare", [\out, context.out_b, \snare_trigger,val,\snare_tone,snare_tone,\snappy,snappy], target:pg);
 		});
 
     this.addCommand("snare_tone", "f", {arg msg;
@@ -168,23 +169,22 @@ SynthDef.new("claves", {
 		this.addCommand("cowbell_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("cowbell", [\out, context.out_b, \cowbell_trigger,val], target:context.xg);
+		  Synth("cowbell", [\out, context.out_b, \cowbell_trigger,val], target:pg);
 		});
 		
 		
 		this.addCommand("clap_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("clap", [\out, context.out_b, \clap_trigger,val], target:context.xg);
+		  Synth("clap", [\out, context.out_b, \clap_trigger,val], target:pg);
 		});
 		
 		this.addCommand("claves_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("claves", [\out, context.out_b, \claves_trigger,val], target:context.xg);
+		  Synth("claves", [\out, context.out_b, \claves_trigger,val], target:pg);
 		});
   }
-
 
   // Define a function that is called when the synth is shut down
   free {

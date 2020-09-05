@@ -14,6 +14,7 @@
 -- e3+k1 number of steps
 --
 -- pangrus 2020
+-- ver 1.1
 
 -- hachi means 8
 engine.name = "Hachi"
@@ -61,7 +62,7 @@ end
 function init_patterns()
     for i = 1, instrument_number do
         instrument[i] = {
-            k = math.floor(math.random() * 6) + 2,
+            k = math.floor(math.random() * 4) + 1,
             n = 16,
             pos = 1,
             s = {}
@@ -223,11 +224,11 @@ function enc(n, d)
         --kick parameters
         if selected == 1 then
             if n == 2 then
-                kick_tone = util.clamp(kick_tone + d, 30, 2000)
+                kick_tone = util.clamp(kick_tone + d, 30, 1000)
                 engine.kick_tone(kick_tone)
             end
             if n == 3 then
-                kick_decay = util.clamp(kick_decay + d, 1, 100)
+                kick_decay = util.clamp(kick_decay + d, 1, 35)
                 engine.kick_decay(kick_decay)
             end
         end
@@ -235,7 +236,7 @@ function enc(n, d)
         -- hh parameters
         if selected == 2 then
             if n == 2 then
-                hh_decay = util.clamp(hh_decay + d, 1, 200)
+                hh_decay = util.clamp(hh_decay + d, 1, 15)
                 engine.hh_decay(hh_decay / 10)
             end
         end
