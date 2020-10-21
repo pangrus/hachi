@@ -14,11 +14,7 @@
 -- e2+k1 number of pulses
 -- e3+k1 number of steps
 --
--- --thanks-- 
--- tehn for playfair
--- justmat for foulplay
--- toneburst for the supercollider tips
--- all the people at lines 
+-- thanks to all the people at lines! 
 --
 -- pangrus 2020
 -- ver 2.0
