@@ -100,7 +100,7 @@ function init_patterns()
     for i = 1, instrument_number do
         instrument[i] = {
             k = 0,
-            n = 32,
+            n = 16,
             r = 0,
             pos = 1,
             s = {},
@@ -114,7 +114,7 @@ function clear_patterns()
     for i = 1, instrument_number do
         instrument[i] = {
             k = 0,
-            n = 32,
+            n = 16,
             r = 0,
             pos = 1,
             s = {},
