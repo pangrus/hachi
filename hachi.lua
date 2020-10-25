@@ -14,7 +14,8 @@
 -- e2+k1 number of pulses
 -- e3+k1 number of steps
 --
--- thanks to all the people at lines! 
+-- many thanks to the lines community
+-- for help, support and inspiration
 --
 -- pangrus 2020
 -- ver 2.0
