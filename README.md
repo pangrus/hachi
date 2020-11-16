@@ -9,18 +9,18 @@ The sequencer borrows some techniques from *playfair* euclidean drummer written 
 ![hachi](hachi.png)
 
 ## how to use hachi
-k1 shift
-k1+k3 clear all (if stopped)
-k1+k3 randomize (if started)
-k2 start/stop
-k3 insert step (if started)
-k3 randomize all (if stopped)
-e1 instrument select
-e2 drum parameter 1
-e3 drum parameter 2
-e1+k1 rotate pattern
-e2+k1 number of pulses
-e3+k1 number of steps
+k1 shift  
+k1+k3 clear all (if stopped)  
+k1+k3 randomize (if started)  
+k2 start/stop  
+k3 insert step (if started)  
+k3 randomize all (if stopped)  
+e1 instrument select  
+e2 drum parameter 1  
+e3 drum parameter 2  
+e1+k1 rotate pattern  
+e2+k1 number of pulses  
+e3+k1 number of steps  
 
 
 
