@@ -125,6 +125,11 @@ function clear_patterns()
      -- default rotation parameter for hh and snare
         instrument[2].r = 2
         instrument[3].r = 4
+    
+    -- instant gratification :-)
+    for i = 1, instrument_number do
+            randomize_pattern(i)
+    end
 end
 
 function randomize_pattern(sel)
