@@ -1,6 +1,6 @@
 # hachi
 
-Euclidean drum machine with a SuperCollider engine emulating the Roland TR808 sound.  
+Euclidean drum machine emulating the TR-808 sound.  
 I’ve written this script to learn Lua, SuperCollider and the norns environment.  
 The sound engine is based on the SC808 by [Yoshinosuke Horiuchi](https://www.patreon.com/4H).  
 I have implemented only my favorite sounds, to keep the GUI in a single norns page.
