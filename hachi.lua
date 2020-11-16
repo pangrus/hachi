@@ -1,5 +1,7 @@
 -- hachi
 -- 808 drum machine for norns
+-- V2.0 @pangrus
+-- https://llllllll.co/t/35947
 --
 -- k1 shift
 -- k1+k3 clear all (if stopped)
@@ -13,12 +15,6 @@
 -- e1+k1 rotate pattern
 -- e2+k1 number of pulses
 -- e3+k1 number of steps
---
--- many thanks to the lines community
--- for help, support and inspiration
---
--- pangrus 2020
--- ver 2.0
 
 
 -- hachi means 8
