@@ -1,7 +1,7 @@
 -- hachi
 -- 808 drum machine for norns
 -- V2.0 @pangrus
--- https://llllllll.co/t/35947
+-- https://llllllll.co/t/hachi-euclidean-drum-machine/35947
 --
 -- k1 shift
 -- k1+k3 clear all (if stopped)
