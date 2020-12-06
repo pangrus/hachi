@@ -8,8 +8,8 @@ Engine_Hachi : CroneEngine {
   var hh_decay = 1.5;
   var hh_tone = 500;
   var hh_level = 0.9;
-  var snare_tone = 3;
-  var snare_snappy = 150;
+  var snare_tone = 300;
+  var snare_snappy = 1.5;
   var snare_level = 0.7;
   var clap_level = 0.4;
   var cowbell_level = 0.3;
