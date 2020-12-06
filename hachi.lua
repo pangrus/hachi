@@ -1,6 +1,6 @@
 -- hachi
 -- 808 drum machine for norns
--- V2.0 @pangrus
+-- V2.1 @pangrus
 -- https://llllllll.co/t/hachi-euclidean-drum-machine/35947
 --
 -- k1 shift
@@ -9,13 +9,12 @@
 -- k2 start/stop
 -- k3 insert step (if started)
 -- k3 randomize all (if stopped)
--- e1 instrument select
+-- e1 drum select
 -- e2 drum parameter 1
 -- e3 drum parameter 2
 -- e1+k1 rotate pattern
 -- e2+k1 number of pulses
 -- e3+k1 number of steps
-
 
 -- hachi means 8
 engine.name = "Hachi"
@@ -24,19 +23,13 @@ engine.name = "Hachi"
 er = require "er"
 
 -- variables
-local instrument = {}
-local instrument_number = 6
-local instrument_names = {"BD", "HH", "SN", "CP", "CW", "CL"}
+local drum = {}
+local drum_number = 6
+local name = {"BD", "HH", "SD", "CP", "CW", "CL"}
 local reset = false
 local is_running = false
 local selected = 1
 local shift = false
-local kick_tone = 60
-local kick_decay = 15
-local hh_tone = 200
-local hh_decay = 10
-local snare_tone = 360
-local snappy = 100
 
 -- midi clock management
 local MIDI_Clock = require "beatclock"
@@ -64,121 +57,297 @@ function init()
         clk:start()
     end
     clk.on_select_external = reset_sequence
-    params:add_separator()
+    clk.on_start = reset_sequence
+  
+    -- parameters
+    params:add_separator("clock parameters")
     clk:add_clock_params()
 
-    -- reset
+    params:add_separator("pattern parameters")
+    for i = 1, drum_number do
+        params:add {
+            type = "number",
+            id = name[i] .. " rotation",
+            name = name[i] .. " rotation",
+            min = 0,
+            max = 32,
+            default = 0,
+            action = function()
+                selected = i
+                generate_patterns()
+            end
+        }
+        params:add {
+            type = "number",
+            id = name[i] .. " pulses",
+            name = name[i] .. " pulses",
+            min = 0,
+            max = 32,
+            default = 0,
+            action = function()
+                selected = i
+                generate_patterns()
+            end
+        }
+        params:add {
+            type = "number",
+            id = name[i] .. " steps",
+            name = name[i] .. " steps",
+            min = 1,
+            max = 32,
+            default = 16,
+            action = function()
+                selected = i
+                generate_patterns()
+            end
+        }
+    end
+    params:add_separator("sound parameters")
+    params:add {
+        type = "number",
+        id = "BD tone",
+        name = "BD tone",
+        min = 45,
+        max = 300,
+        default = 60,
+        action = function(x)
+            selected = 1
+            engine.kick_tone(x)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "BD decay",
+        name = "BD decay",
+        min = 1,
+        max = 35,
+        default = 25,
+        action = function(x)
+            selected = 1
+            engine.kick_decay(x)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "BD level",
+        name = "BD level",
+        min = 0,
+        max = 100,
+        default = 100,
+        action = function(x)
+            engine.kick_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "HH tone",
+        name = "HH tone",
+        min = 50,
+        max = 1000,
+        default = 500,
+        action = function(x)
+            selected = 2
+            engine.hh_tone(x)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "HH decay",
+        name = "HH decay",
+        min = 10,
+        max = 30,
+        default = 15,
+        action = function(x)
+            selected = 2
+            engine.hh_decay(x / 10)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "HH level",
+        name = "HH level",
+        min = 0,
+        max = 100,
+        default = 90,
+        action = function(x)
+            engine.hh_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "SD tone",
+        name = "SD tone",
+        min = 50,
+        max = 1000,
+        default = 300,
+        action = function(x)
+            selected = 3
+            engine.snare_tone(x)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "SD snappy",
+        name = "SD snappy",
+        min = 1,
+        max = 300,
+        default = 130,
+        action = function(x)
+            selected = 3
+            engine.snare_snappy(x / 100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "SD level",
+        name = "SD level",
+        min = 0,
+        max = 100,
+        default = 70,
+        action = function(x)
+            engine.snare_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "CP level",
+        name = "CP level",
+        min = 0,
+        max = 100,
+        default = 50,
+        action = function(x)
+            engine.clap_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "CW level",
+        name = "CW level",
+        min = 0,
+        max = 100,
+        default = 40,
+        action = function(x)
+            engine.cowbell_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "CL level",
+        name = "CL level",
+        min = 0,
+        max = 100,
+        default = 30,
+        action = function(x)
+            engine.claves_level(x/100)
+            redraw()
+        end
+    }
+   
     reset_sequence()
     init_patterns()
-
-    -- load previous state
-    local file = io.open(_path.data .. "hachi/hachi_data.txt", "r")
-    if file then
-        loadstate()
-    else
-        savestate()
-    end
-
-    -- instrument parameters
-    engine.kick_tone(kick_tone)
-    engine.kick_decay(kick_decay)
-    engine.hh_tone(hh_tone)
-    engine.hh_decay(hh_decay / 10)
-    engine.snappy(snappy / 100)
-    engine.snare_tone(snare_tone)
-
-    -- generate pattens
-    for i = 1, instrument_number do
-        generate_pattern(i)
-    end
+    generate_patterns()
+    load_state()
+    selected = 1
 end
 
 function init_patterns()
-    for i = 1, instrument_number do
-        instrument[i] = {
-            k = 0,
-            n = 16,
-            r = 0,
-            pos = 1,
-            s = {},
-            rot = {}
+    for i = 1, drum_number do
+        drum[i] = {
+            position = 1,
+            pattern = {},
+            rotated = {}
         }
-        generate_pattern(i)
     end
     -- instant gratification :-)
-    for i = 1, instrument_number do
-            randomize_pattern(i)
+    for i = 1, drum_number do
+        randomize_pattern(i)
     end
-        -- default rotation parameter for hh and snare
-        instrument[2].r = 2
-        instrument[3].r = 4
+    -- default rotation parameter for hh and snare
+    params:set("HH rotation", 2)
+    params:set("SD rotation", 4)
 end
 
 function clear_patterns()
-    for i = 1, instrument_number do
-        instrument[i] = {
-            k = 0,
-            n = 16,
-            r = 0,
-            pos = 1,
-            s = {},
-            rot = {}
+    for i = 1, drum_number do
+        drum[i] = {
+            position = 1,
+            pattern = {},
+            rotated = {}
         }
-        generate_pattern(i)
+        params:set(name[i] .. " rotation", 0)
+        params:set(name[i] .. " pulses", 0)
+        params:set(name[i] .. " steps", 16)
     end
-     -- default rotation parameter for hh and snare
-        instrument[2].r = 2
-        instrument[3].r = 4
+    
+    -- uncomment and expand to your personal taste
+    -- default rotation parameter for hh and snare
+    -- params:set("HH rotation", 2)
+    -- params:set("SD rotation", 4)
 end
 
 function randomize_pattern(sel)
-    instrument[sel].k = math.floor(math.random(6))
-    generate_pattern(sel)
+    params:set(name[sel] .. " pulses", math.floor(math.random(6)))
+    generate_patterns()
+    selected = 1
 end
 
-function generate_pattern(i)
-    if instrument[i].k == 0 then
-        for n = 1, 32 do
-            instrument[i].s[n] = false
+function generate_patterns()
+    for i = 1, drum_number do
+        if params:get(name[i] .. " pulses") == 0 then
+            for n = 1, 32 do
+                drum[i].pattern[n] = false
+            end
+        else
+            drum[i].pattern = er.gen(params:get(name[i] .. " pulses"), params:get(name[i] .. " steps"))
         end
-    else
-        instrument[i].s = er.gen(instrument[i].k, instrument[i].n)
+        rotate_pattern(i)
     end
-    rotate_pattern(i)
+    redraw()
 end
 
 function rotate_pattern(i)
-    for n = 1, instrument[i].r do
-        instrument[i].rot[n] = instrument[i].s[instrument[i].n - instrument[i].r + n]
+    for n = 1, params:get(name[i] .. " rotation") do
+        drum[i].rotated[n] = drum[i].pattern[params:get(name[i] .. " steps") - params:get(name[i] .. " rotation") + n]
     end
-    for n = 1, instrument[i].n - instrument[i].r do
-        instrument[i].rot[n + instrument[i].r] = instrument[i].s[n]
+    for n = 1, params:get(name[i] .. " steps") - params:get(name[i] .. " rotation") do
+        drum[i].rotated[n + params:get(name[i] .. " rotation")] = drum[i].pattern[n]
     end
 end
 
 function execute_step()
     if reset then
-        for i = 1, instrument_number do
-            instrument[i].pos = 1
+        for i = 1, drum_number do
+            drum[i].position = 1
         end
         reset = false
     else
-        for i = 1, instrument_number do
-            instrument[i].pos = (instrument[i].pos % instrument[i].n) + 1
+        for i = 1, drum_number do
+            drum[i].position = (drum[i].position % params:get(name[i] .. " steps") + 1)
         end
     end
-    trigger_instrument()
+    trigger_drum()
     redraw()
 end
 
-function trigger_instrument()
-    for i = 1, instrument_number do
-        if instrument[i].rot[instrument[i].pos] then
+function trigger_drum()
+    for i = 1, drum_number do
+        if drum[i].rotated[drum[i].position] then
             if i == 1 then
                 engine.kick_trigger(1)
             end
             if i == 2 then
-                engine.hhclosed_trigger(1)
+                engine.hh_trigger(1)
             end
             if i == 3 then
                 engine.snare_trigger(1)
@@ -211,14 +380,15 @@ function key(n, z)
 
     -- start/stop
     if n == 2 and z == 1 and is_running then
-        clk:stop()
         reset_sequence()
+        clk:stop()
         is_running = false
-        savestate()
+        save_state()
     elseif n == 2 and z == 1 and is_running == false then
+        reset_sequence()
         clk:start()
         is_running = true
-        savestate()
+        save_state()
     end
 
     -- real time programming
@@ -227,7 +397,7 @@ function key(n, z)
             engine.kick_trigger(1)
         end
         if selected == 2 then
-            engine.hhclosed_trigger(1)
+            engine.hh_trigger(1)
         end
         if selected == 3 then
             engine.snare_trigger(1)
@@ -241,12 +411,12 @@ function key(n, z)
         if selected == 6 then
             engine.claves_trigger(1)
         end
-        instrument[selected].rot[instrument[selected].pos] = "true"
+        drum[selected].rotated[drum[selected].position] = "true"
     end
 
     -- randomize all pattern
     if n == 3 and z == 1 and not is_running and not shift then
-        for i = 1, instrument_number do
+        for i = 1, drum_number do
             randomize_pattern(i)
         end
     end
@@ -260,117 +430,115 @@ function key(n, z)
     if n == 3 and z == 1 and shift and not is_running then
         clear_patterns()
     end
-
     redraw()
 end
 
 function enc(n, d)
     if n == 1 and shift == false then
-        selected = util.clamp(selected + d, 1, instrument_number)
+        selected = util.clamp(selected + d, 1, drum_number)
+        redraw()
     end
 
     if shift == true then
         if n == 1 then
-            instrument[selected].r = util.clamp(instrument[selected].r + d, 0, instrument[selected].n)
+            params:set(name[selected] .. " rotation", util.clamp(params:get(name[selected] .. " rotation") + d, 0, params:get(name[selected] .. " steps")))
             rotate_pattern(selected)
         end
 
         if n == 2 then
-            instrument[selected].k = util.clamp(instrument[selected].k + d, 0, instrument[selected].n)
+            params:set(name[selected] .. " pulses", util.clamp(params:get(name[selected] .. " pulses") + d, 0, params:get(name[selected] .. " steps")))
         end
         if n == 3 then
-            instrument[selected].n = util.clamp(instrument[selected].n + d, 1, 32)
-            instrument[selected].k = util.clamp(instrument[selected].k, 0, instrument[selected].n)
-            instrument[selected].r = util.clamp(instrument[selected].r, 0, instrument[selected].n)
+            params:delta(name[selected] .. " steps", d)
+            params:set(name[selected] .. " pulses", util.clamp(params:get(name[selected] .. " pulses"), 0, params:get(name[selected] .. " steps")))
+            params:set(name[selected] .. " rotation", util.clamp(params:get(name[selected] .. " rotation"), 0, params:get(name[selected] .. " steps")))
         end
-        generate_pattern(selected)
+        generate_patterns()
     end
-
     if shift == false then
+
         --kick parameters
         if selected == 1 then
             if n == 2 then
-                kick_tone = util.clamp(kick_tone + d, 30, 1000)
-                engine.kick_tone(kick_tone)
+                params:delta("BD tone", d)
             end
             if n == 3 then
-                kick_decay = util.clamp(kick_decay + d, 1, 35)
-                engine.kick_decay(kick_decay)
+                params:delta("BD decay", d)
             end
         end
 
         -- hh parameters
         if selected == 2 then
             if n == 2 then
-                hh_tone = util.clamp(hh_tone + d, 50, 700)
-                engine.hh_tone(hh_tone)
+                params:delta("HH tone", d)
             end
             if n == 3 then
-                hh_decay = util.clamp(hh_decay + d, 10, 30)
-                engine.hh_decay(hh_decay / 10)
+                params:delta("HH decay", d)
             end
         end
 
         -- snare parameters
         if selected == 3 then
             if n == 2 then
-                snare_tone = util.clamp(snare_tone + d, 50, 1000)
-                engine.snare_tone(snare_tone)
+                params:delta("SD tone", d)
             end
             if n == 3 then
-                snappy = util.clamp(snappy + d, 1, 300)
-                engine.snappy(snappy / 100)
+                params:delta("SD snappy", d)
             end
         end
     end
-    redraw()
 end
 
--- save state in hachi_data.txt
-function savestate()
-    local file = io.open(_path.data .. "hachi/hachi_data.txt", "w+")
-    io.output(file)
-    for i = 1, instrument_number do
-        io.write(instrument[i].r .. "\n")
-        io.write(instrument[i].k .. "\n")
-        io.write(instrument[i].n .. "\n")
-    end
-    io.write(kick_tone .. "\n")
-    io.write(kick_decay .. "\n")
-    io.write(hh_tone .. "\n")
-    io.write(hh_decay .. "\n")
-    io.write(snare_tone .. "\n")
-    io.write(snappy .. "\n")
-    io.close(file)
-end
+function save_state()
+  params:write(_path.data .. "hachi/hachi.pset")
+  local file = io.open(_path.data .. "hachi/hachi_pattern.data", "w+")
+  io.output(file)
+  io.write("hachi pattern file v2.1" .. "\n")
+    for i = 1, drum_number do
+      for j = 1, 32 do
+        if drum[i].rotated[j] then
+          io.write("pulse".."\n")
+        else
+          io.write("step".."\n")
+        end
+      end
+    end  
+  io.close(file)
+end  
 
--- load previous state
-function loadstate()
-    local file = io.open(_path.data .. "hachi/hachi_data.txt", "r")
+function load_state()
+  params:read(_path.data .. "hachi/hachi.pset")
+  local file = io.open(_path.data .. "hachi/hachi_pattern.data", "r")
+  if file then
+    print("hachi pattern file loaded")
+    -- all this stuff is required only to manage the real time recording :-)
     io.input(file)
-    for i = 1, instrument_number do
-        instrument[i].r = tonumber(io.read())
-        instrument[i].k = tonumber(io.read())
-        instrument[i].n = tonumber(io.read())
+    if io.read() == "hachi pattern file v2.1" then
+      for i = 1, drum_number do
+        for j = 1, 32 do
+          if io.read() == "pulse" then
+            drum[i].rotated[j] = true
+          else
+            drum[i].rotated[j] = false
+          end
+        end
+      end  
+    else
+      print("invalid data file")
     end
-    kick_tone = tonumber(io.read())
-    kick_decay = tonumber(io.read())
-    hh_tone = tonumber(io.read())
-    hh_decay = tonumber(io.read())
-    snare_tone = tonumber(io.read())
-    snappy = tonumber(io.read())
     io.close(file)
-end
+  end
 
+end
 function redraw()
     screen.clear()
 
     -- draw pattern
-    for i = 1, instrument[selected].n do
-        screen.level((instrument[selected].pos == i and not reset) and 12 or 3)
+    for i = 1, params:get(name[selected] .. " steps") do
+        screen.level((drum[selected].position == i and not reset) and 12 or 3)
         screen.rect(4 * i - 3, 62, 3, -6)
         screen.stroke()
-        if instrument[selected].rot[i] then
+        if drum[selected].rotated[i] then
             screen.level(10)
             screen.rect(4 * i - 3, 61, 2, -5)
             screen.fill()
@@ -378,9 +546,11 @@ function redraw()
         end
     end
 
-    -- draw instruments
-    for i = 1, instrument_number do
-        screen.level((i == selected) and 3 or 1)
+    -- draw drums
+    for i = 1, drum_number do
+      
+        local level = math.floor(params:get(name[i].." level") / 25)
+        screen.level((i == selected) and 7 or level)
         screen.arc(i * 21 - 5, 47, 5, 0, math.pi / 2)
         screen.arc(i * 21 - 14, 47, 5, math.pi / 2, math.pi)
         if shift then
@@ -391,28 +561,28 @@ function redraw()
             screen.arc(i * 21 - 5, 5, 5, math.pi * 3 / 2, 0)
         end
         screen.fill()
-        screen.level(12)
+        screen.level(15)
         screen.move(i * 21 - 10, 8)
-        screen.text_center(instrument_names[i])
+        screen.text_center(name[i])
         screen.move(i * 21 - 10, 34)
-        screen.text_center(instrument[i].r)
+        screen.text_center(params:get(name[i] .. " rotation"))
         screen.move(i * 21 - 10, 42)
-        screen.text_center(instrument[i].k)
+        screen.text_center(params:get(name[i] .. " pulses"))
         screen.move(i * 21 - 10, 50)
-        screen.text_center(instrument[i].n)
+        screen.text_center(params:get(name[i] .. " steps"))
         screen.stroke()
     end
     screen.move(11, 17)
-    screen.text_center(kick_tone)
+    screen.text_center(params:get "BD tone")
     screen.move(11, 25)
-    screen.text_center(kick_decay)
+    screen.text_center(params:get "BD decay")
     screen.move(32, 17)
-    screen.text_center(hh_tone)
+    screen.text_center(params:get "HH tone")
     screen.move(32, 25)
-    screen.text_center(hh_decay)
+    screen.text_center(params:get "HH decay")
     screen.move(53, 17)
-    screen.text_center(snare_tone)
+    screen.text_center(params:get "SD tone")
     screen.move(53, 25)
-    screen.text_center(snappy)
+    screen.text_center(params:get "SD snappy")
     screen.update()
 end
