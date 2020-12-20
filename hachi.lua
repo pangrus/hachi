@@ -1,6 +1,6 @@
 -- hachi
 -- 808 drum machine for norns
--- V2.1 @pangrus
+-- V2.2 @pangrus
 -- https://llllllll.co/t/hachi-euclidean-drum-machine/35947
 --
 -- k1 shift
@@ -24,8 +24,8 @@ er = require "er"
 
 -- variables
 local drum = {}
-local drum_number = 6
-local name = {"BD", "HH", "SD", "CP", "CW", "CL"}
+local drum_number = 7
+local name = {"BD", "CH", "OH",  "SD", "CP", "CW", "CL"}
 local reset = false
 local is_running = false
 local selected = 1
@@ -60,7 +60,8 @@ function init()
     clk.on_start = reset_sequence
   
     -- parameters
-    params:add_separator("clock parameters")
+   params:set('reverb', 1)
+   params:add_separator("clock parameters")
     clk:add_clock_params()
 
     params:add_separator("pattern parameters")
@@ -143,39 +144,77 @@ function init()
     }
     params:add {
         type = "number",
-        id = "HH tone",
-        name = "HH tone",
+        id = "CH tone",
+        name = "CH tone",
         min = 50,
         max = 1000,
         default = 500,
         action = function(x)
             selected = 2
-            engine.hh_tone(x)
+            engine.ch_tone(x)
             redraw()
         end
     }
     params:add {
         type = "number",
-        id = "HH decay",
-        name = "HH decay",
+        id = "CH decay",
+        name = "CH decay",
         min = 10,
         max = 30,
         default = 15,
         action = function(x)
             selected = 2
-            engine.hh_decay(x / 10)
+            engine.ch_decay(x / 10)
             redraw()
         end
     }
     params:add {
         type = "number",
-        id = "HH level",
-        name = "HH level",
+        id = "CH level",
+        name = "CH level",
         min = 0,
         max = 100,
         default = 90,
         action = function(x)
-            engine.hh_level(x/100)
+            engine.ch_level(x/100)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "OH tone",
+        name = "OH tone",
+        min = 50,
+        max = 1000,
+        default = 400,
+        action = function(x)
+            selected = 3
+            engine.oh_tone(x)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "OH decay",
+        name = "OH decay",
+        min = 10,
+        max = 40,
+        default = 15,
+        action = function(x)
+            selected = 3
+            engine.oh_decay(x / 10)
+            redraw()
+        end
+    }
+    params:add {
+        type = "number",
+        id = "OH level",
+        name = "OH level",
+        min = 0,
+        max = 100,
+        default = 80,
+        action = function(x)
+            engine.oh_level(x/100)
             redraw()
         end
     }
@@ -273,8 +312,9 @@ function init_patterns()
     for i = 1, drum_number do
         randomize_pattern(i)
     end
-    -- default rotation parameter for hh and snare
-    params:set("HH rotation", 2)
+    -- default rotation parameter for hi hat and snare
+    params:set("CH rotation", 2)
+    params:set("OH rotation", 2)
     params:set("SD rotation", 4)
 end
 
@@ -291,15 +331,16 @@ function clear_patterns()
     end
     
     -- uncomment and expand to your personal taste
-    -- default rotation parameter for hh and snare
-    -- params:set("HH rotation", 2)
+    -- default rotation parameter for hi hat and snare
+    -- params:set("CH rotation", 2)
+    -- params:set("OH rotation", 2)
     -- params:set("SD rotation", 4)
 end
 
 function randomize_pattern(sel)
     params:set(name[sel] .. " pulses", math.floor(math.random(6)))
     generate_patterns()
-    selected = 1
+ --   selected = sel
 end
 
 function generate_patterns()
@@ -347,18 +388,21 @@ function trigger_drum()
                 engine.kick_trigger(1)
             end
             if i == 2 then
-                engine.hh_trigger(1)
+                engine.ch_trigger(1)
             end
             if i == 3 then
-                engine.snare_trigger(1)
+                engine.oh_trigger(1)
             end
             if i == 4 then
-                engine.clap_trigger(1)
+                engine.snare_trigger(1)
             end
             if i == 5 then
-                engine.cowbell_trigger(1)
+                engine.clap_trigger(1)
             end
             if i == 6 then
+                engine.cowbell_trigger(1)
+            end
+            if i == 7 then
                 engine.claves_trigger(1)
             end
         end
@@ -397,18 +441,21 @@ function key(n, z)
             engine.kick_trigger(1)
         end
         if selected == 2 then
-            engine.hh_trigger(1)
+            engine.ch_trigger(1)
         end
         if selected == 3 then
-            engine.snare_trigger(1)
+            engine.oh_trigger(1)
         end
         if selected == 4 then
-            engine.clap_trigger(1)
+            engine.snare_trigger(1)
         end
         if selected == 5 then
-            engine.cowbell_trigger(1)
+            engine.clap_trigger(1)
         end
         if selected == 6 then
+            engine.cowbell_trigger(1)
+        end
+        if selected == 7 then
             engine.claves_trigger(1)
         end
         drum[selected].rotated[drum[selected].position] = "true"
@@ -419,6 +466,7 @@ function key(n, z)
         for i = 1, drum_number do
             randomize_pattern(i)
         end
+        selected = 1 
     end
 
     -- randomize selected pattern
@@ -467,18 +515,28 @@ function enc(n, d)
             end
         end
 
-        -- hh parameters
+        -- ch parameters
         if selected == 2 then
             if n == 2 then
-                params:delta("HH tone", d)
+                params:delta("CH tone", d)
             end
             if n == 3 then
-                params:delta("HH decay", d)
+                params:delta("CH decay", d)
+            end
+        end
+
+        -- oh parameters
+        if selected == 3 then
+            if n == 2 then
+                params:delta("OH tone", d)
+            end
+            if n == 3 then
+                params:delta("OH decay", d)
             end
         end
 
         -- snare parameters
-        if selected == 3 then
+        if selected == 4 then
             if n == 2 then
                 params:delta("SD tone", d)
             end
@@ -551,38 +609,42 @@ function redraw()
       
         local level = math.floor(params:get(name[i].." level") / 25)
         screen.level((i == selected) and 7 or level)
-        screen.arc(i * 21 - 5, 47, 5, 0, math.pi / 2)
-        screen.arc(i * 21 - 14, 47, 5, math.pi / 2, math.pi)
+        screen.arc(i * 18 - 4, 49, 3, 0, math.pi / 2)
+        screen.arc(i * 18 - 14, 49, 3, math.pi / 2, math.pi)
         if shift then
-            screen.arc(i * 21 - 14, 32, 5, math.pi, math.pi * 3 / 2)
-            screen.arc(i * 21 - 5, 32, 5, math.pi * 3 / 2, 0)
+        screen.arc(i * 18 - 14, 30, 3, math.pi, math.pi * 3 / 2)
+        screen.arc(i * 18 - 4, 30, 3, math.pi * 3 / 2, 0)
         else
-            screen.arc(i * 21 - 14, 5, 5, math.pi, math.pi * 3 / 2)
-            screen.arc(i * 21 - 5, 5, 5, math.pi * 3 / 2, 0)
+        screen.arc(i * 18 - 14, 3, 3, math.pi, math.pi * 3 / 2)
+        screen.arc(i * 18 - 4, 3, 3, math.pi * 3 / 2, 0)
         end
         screen.fill()
         screen.level(15)
-        screen.move(i * 21 - 10, 8)
+        screen.move(i * 18 - 9, 7)
         screen.text_center(name[i])
-        screen.move(i * 21 - 10, 34)
+        screen.move(i * 18 - 9, 34)
         screen.text_center(params:get(name[i] .. " rotation"))
-        screen.move(i * 21 - 10, 42)
+        screen.move(i * 18 - 9, 42)
         screen.text_center(params:get(name[i] .. " pulses"))
-        screen.move(i * 21 - 10, 50)
+        screen.move(i * 18 - 9, 50)
         screen.text_center(params:get(name[i] .. " steps"))
         screen.stroke()
     end
-    screen.move(11, 17)
+    screen.move(9, 17)
     screen.text_center(params:get "BD tone")
-    screen.move(11, 25)
+    screen.move(9, 25)
     screen.text_center(params:get "BD decay")
-    screen.move(32, 17)
-    screen.text_center(params:get "HH tone")
-    screen.move(32, 25)
-    screen.text_center(params:get "HH decay")
-    screen.move(53, 17)
+    screen.move(27, 17)
+    screen.text_center(params:get "CH tone")
+    screen.move(27, 25)
+    screen.text_center(params:get "CH decay")
+    screen.move(45, 17)
+    screen.text_center(params:get "OH tone")
+    screen.move(45, 25)
+    screen.text_center(params:get "OH decay")
+    screen.move(63, 17)
     screen.text_center(params:get "SD tone")
-    screen.move(53, 25)
+    screen.move(63, 25)
     screen.text_center(params:get "SD snappy")
     screen.update()
 end
