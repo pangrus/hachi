@@ -147,7 +147,7 @@ function init()
         id = "CH tone",
         name = "CH tone",
         min = 50,
-        max = 1000,
+        max = 999,
         default = 500,
         action = function(x)
             selected = 2
@@ -185,7 +185,7 @@ function init()
         id = "OH tone",
         name = "OH tone",
         min = 50,
-        max = 1000,
+        max = 999,
         default = 400,
         action = function(x)
             selected = 3
