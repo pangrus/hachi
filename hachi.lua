@@ -226,7 +226,7 @@ function init()
         max = 1000,
         default = 300,
         action = function(x)
-            selected = 3
+            selected = 4
             engine.snare_tone(x)
             redraw()
         end
@@ -239,7 +239,7 @@ function init()
         max = 300,
         default = 130,
         action = function(x)
-            selected = 3
+            selected = 4
             engine.snare_snappy(x / 100)
             redraw()
         end
