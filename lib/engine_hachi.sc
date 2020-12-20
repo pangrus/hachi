@@ -5,9 +5,12 @@ Engine_Hachi : CroneEngine {
   var kick_tone = 60;
   var kick_decay = 25;
   var kick_level = 1;
-  var hh_decay = 1.5;
-  var hh_tone = 500;
-  var hh_level = 0.9;
+  var ch_decay = 1.5;
+  var ch_tone = 500;
+  var ch_level = 0.9;
+  var oh_decay = 1.5;
+  var oh_tone = 400;
+  var oh_level = 0.9;
   var snare_tone = 300;
   var snare_snappy = 1.5;
   var snare_level = 0.7;
@@ -47,16 +50,16 @@ SynthDef("kick", {
       Out.ar(0, sig);
 }).add;
 
-SynthDef.new("hh", {
-	arg hh_trigger, hh_tone, hh_decay , hh_level, pan=0;
+SynthDef.new("ch", {
+	arg ch_trigger, ch_tone, ch_decay , ch_level, pan=0;
 	var sig, sighi,siglow, sum, env, osc1, osc2, osc3, osc4, osc5, osc6;
-	env = EnvGen.kr(Env.perc(0.005, hh_decay, 1, -30),doneAction:3);
-	osc1 = LFPulse.ar(hh_tone + 3.52);
-	osc2 = LFPulse.ar(hh_tone + 166.31);
-	osc3 = LFPulse.ar(hh_tone + 101.77);
-	osc4 = LFPulse.ar(hh_tone + 318.19);
-	osc5 = LFPulse.ar(hh_tone + 611.16);
-	osc6 = LFPulse.ar(hh_tone + 338.75);
+	env = EnvGen.kr(Env.perc(0.005, ch_decay, 1, -30),doneAction:3);
+	osc1 = LFPulse.ar(ch_tone + 3.52);
+	osc2 = LFPulse.ar(ch_tone + 166.31);
+	osc3 = LFPulse.ar(ch_tone + 101.77);
+	osc4 = LFPulse.ar(ch_tone + 318.19);
+	osc5 = LFPulse.ar(ch_tone + 611.16);
+	osc6 = LFPulse.ar(ch_tone + 338.75);
 	sighi = (osc1 + osc2 + osc3 + osc4 + osc5 + osc6);
     siglow = (osc1 + osc2 + osc3 + osc4 + osc5 + osc6);
     sighi = BPF.ar(sighi, 8900, 1);
@@ -64,9 +67,36 @@ SynthDef.new("hh", {
     siglow = BBandPass.ar(siglow, 8900, 0.8);
     siglow = BHiPass.ar(siglow, 9000, 0.3);
     sig = BPeakEQ.ar((siglow+sighi), 9700, 0.8, 0.7);
-    sig = sig * env * hh_level;
+    sig = sig * env * ch_level;
     sig = Pan2.ar(sig, pan);
     Out.ar(0, sig);
+}).add;
+
+
+SynthDef.new("oh", {
+	arg oh_trigger, oh_tone, oh_decay, oh_level, pan=0;
+	var sig, siga, sigb, env1, env2, osc1, osc2, osc3, osc4, osc5, osc6, sum;
+	env1 = EnvGen.kr(Env.perc(0.1, oh_decay, curve:-3), doneAction:2);
+	env2 = EnvGen.kr(Env.new([0, 1, 0], [0, oh_decay*5], curve:-150), doneAction:0);
+	osc1 = LFPulse.ar(oh_tone + 3.52);
+	osc2 = LFPulse.ar(oh_tone + 166.31);
+	osc3 = LFPulse.ar(oh_tone + 101.77);
+	osc4 = LFPulse.ar(oh_tone + 318.19);
+	osc5 = LFPulse.ar(oh_tone + 611.16);
+	osc6 = LFPulse.ar(oh_tone + 338.75);
+	sig = osc1 + osc2 + osc3 + osc4 + osc5 + osc6;
+	sig = BLowShelf.ar(sig, 990, 2, -3);
+	sig = BPF.ar(sig, 7700);
+	sig = BPeakEQ.ar(sig, 7200, 0.5, 5);
+	sig = BHiPass4.ar(sig, 8100, 0.7);
+	sig = BHiShelf.ar(sig, 9400, 1, 5);
+	siga = sig * env1 * 0.6;
+	sigb = sig * env2;
+	sum = siga + sigb;
+	sum = LPF.ar(sum, 4000);
+	sum = Pan2.ar(sum, 0);
+	sum = sum * oh_level * 2;
+	Out.ar(0, sum);
 }).add;
 
 SynthDef.new("snare", {
@@ -145,24 +175,41 @@ SynthDef.new("claves", {
       kick_level = msg[1];
     });
 
-    this.addCommand("hh_trigger", "f", {
+    this.addCommand("ch_trigger", "f", {
 		  arg msg;
 		  var val = msg[1];
-		  Synth("hh", [\out, context.out_b, \hh_trigger,val,\hh_decay,hh_decay,\hh_tone,hh_tone,\hh_level,hh_level], target:pg);
+		  Synth("ch", [\out, context.out_b, \ch_trigger,val,\ch_decay,ch_decay,\ch_tone,ch_tone,\ch_level,ch_level], target:pg);
 		});
 
-    this.addCommand("hh_tone", "f", {arg msg;
-      hh_tone = msg[1];
+    this.addCommand("ch_tone", "f", {arg msg;
+      ch_tone = msg[1];
     });
 
-    this.addCommand("hh_decay", "f", {arg msg;
-      hh_decay = msg[1];
+    this.addCommand("ch_decay", "f", {arg msg;
+      ch_decay = msg[1];
     });
 
-    this.addCommand("hh_level", "f", {arg msg;
-      hh_level = msg[1];
+    this.addCommand("ch_level", "f", {arg msg;
+      ch_level = msg[1];
     });
 
+  this.addCommand("oh_trigger", "f", {
+		  arg msg;
+		  var val = msg[1];
+		  Synth("oh", [\out, context.out_b, \oh_trigger,val,\oh_decay,oh_decay,\oh_tone,oh_tone,\oh_level,oh_level], target:pg);
+		});
+
+  this.addCommand("oh_tone", "f", {arg msg;
+      oh_tone = msg[1];
+    });
+
+    this.addCommand("oh_decay", "f", {arg msg;
+      oh_decay = msg[1];
+    });
+
+    this.addCommand("oh_level", "f", {arg msg;
+      oh_level = msg[1];
+    });
 
 		this.addCommand("snare_trigger", "f", {
 		  arg msg;
